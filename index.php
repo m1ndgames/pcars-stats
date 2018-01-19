@@ -10,7 +10,7 @@ echo "Failed to connect to MySQL: " . mysqli_connect_error();
 if ($_POST['showreal'] == "true") {
 	$result = mysqli_query($con,"SELECT * FROM results WHERE aid_drivingline = 'false' AND aid_clutch = 'false' AND aid_gears = 'false' AND aid_brakes = 'false'  AND aid_steering = 'false' AND aid_dmg = 'false' ORDER BY lap_time;");
 } else {
-	$result = mysqli_query($con,"SELECT name,steamid,car_name,car_class,lap_time_converted,MIN(lap_time),sector_1_time_converted,sector_2_time_converted,sector_3_time_converted,event_time_converted,controls,own_setup,aid_drivingline,aid_clutch,aid_gears,aid_dmg,aid_stability,aid_traction,aid_abs,aid_brakes,aid_steering FROM results GROUP BY steamid,car_id ORDER BY MIN(lap_time) ASC;");
+	$result = mysqli_query($con,"SELECT * FROM results res JOIN ( SELECT steamid, car_id, MIN(lap_time) AS min_lap_time FROM results GROUP BY steamid, car_id ) grouped_res ON res.steamid = grouped_res.steamid AND res.car_id = grouped_res.car_id AND res.lap_time = grouped_res.min_lap_time");
 }
 
 echo '<head>
