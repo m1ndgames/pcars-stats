@@ -249,7 +249,7 @@ foreach my $f ( @history ) {
                                         my $sector_3_time = $a->{'Sector1Time'};
 					my $refID = $e->{'refid'};
 
-					# Drop obvious cheaters below 60s per Lap
+					# Drop obvious cheaters
 					if ($lap_time < ($min_lap_time * 1000)) { next; }
 
 					# Read from @members and get carID
