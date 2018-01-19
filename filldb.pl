@@ -10,6 +10,9 @@ use Encode;
 use DBI;
 use DBD::mysql;
 
+# Config
+my $min_lap_time = 60; # Minimum laptime in seconds
+
 # DBI CONFIG VARIABLES
 my $sqlhost = "localhost";
 my $sqldatabase = "pcars";
@@ -193,6 +196,7 @@ $jsonstring =~ s/\/\/ EOF \/\///g;
 # Remove Unicode
 $jsonstring =~ s/[^[:ascii:]]//g;
 
+# Remove empty/broken events and results arrays
 $jsonstring =~ s/"events" : \{\},//g;
 $jsonstring =~ s/"results" : \{\},//g;
 
@@ -215,7 +219,7 @@ my $id = 0;
 foreach my $f ( @history ) {
 	if (!$f->{'stages'}->{'practice1'}) { next; } # Whoops! We only track practice for now!
 	my @members = $f->{'members'};
-	if (!$f->{'stages'}->{'practice1'}->{'events'}) { next; }
+	if (!$f->{'stages'}->{'practice1'}->{'events'}) { next; } # No events during that session...
 	my @events = @{ $f->{'stages'}->{'practice1'}->{'events'} };
 
 	# Look for LapTime events
@@ -243,8 +247,10 @@ foreach my $f ( @history ) {
                                         my $sector_2_time = $a->{'Sector1Time'};
 					my $sector_3_time_converted = &converttime($a->{'Sector3Time'});
                                         my $sector_3_time = $a->{'Sector1Time'};
-
 					my $refID = $e->{'refid'};
+
+					# Drop obvious cheaters below 60s per Lap
+					if ($lap_time < ($min_lap_time * 1000)) { next; }
 
 					# Read from @members and get carID
 					foreach my $m (@members) {
